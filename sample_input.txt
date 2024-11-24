@@ -1,18 +1,18 @@
-John is the father of Riley
-Jill is the mother of Riley
-Miguel is a brother of Riley
+John is the father of Riley.
+Jill is the mother of Riley.
+Miguel is a brother of Riley.
 
-Victor is a brother of John
-Georgia is a sister of John
+Victor is a brother of John.
+Georgia is a sister of John.
 
-George is a brother of Jill
-Victoria is a sister of Jill
+George is a brother of Jill.
+Victoria is a sister of Jill.
 
-Mark is the father of John
-Nana is the mother of John
+Mark is the father of John.
+Nana is the mother of John.
 
-Josh is the father of Jill
-Jolly is the mother of Jill
+Josh is the father of Jill.
+Jolly is the mother of Jill.
 
 Are Victor and John siblings?
 Are Georgia and John siblings?
@@ -53,9 +53,12 @@ Is Riley a daughter of Jill?
 Is Jill a daughter of Nana?
 
 Is Miguel a son of Jill?
+Is Miguel a son of John?
+
 Is John a son of Mark?
+Is Victor a son of Mark?
 
-
+Is Victor an uncle of Miguel?
 Is Georgia an aunt of Miguel?
 Is George an uncle of Riley?
 

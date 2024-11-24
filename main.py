@@ -1,31 +1,30 @@
 import re
 from pyswip import Prolog
 
-# Initialize Prolog engine
+
 prolog = Prolog()
-prolog.consult("family.pl")  # Load the Prolog knowledge base
+prolog.consult("family.pl") 
 
 
 def match_pattern(user_input):
-    """Match user input to a defined statement or question pattern."""
+
    
     patterns = {
        
-        "siblings": r"(.+) and (.+) are siblings",
-        "brother": r"(.+) is a brother of (.+)",
-        "sister": r"(.+) is a sister of (.+)",
-        "father": r"(.+) is the father of (.+)",
-        "mother": r"(.+) is the mother of (.+)",
-        "parents": r"(.+) and (.+) are the parents of (.+)",
-
-        "grandmother": r"(.+) is a grandmother of (.+)",
-        "grandfather": r"(.+) is a grandfather of (.+)",
-        "child": r"(.+) is a child of (.+)",
-        "children": r"(.+) and (.+) are children of (.+)",
-        "daughter": r"(.+) is a daughter of (.+)",
-        "son": r"(.+) is a son of (.+)",
-        "uncle": r"(.+) is an uncle of (.+)",
-        "aunt": r"(.+) is an aunt of (.+)",
+        "siblings": r"(.+) and (.+) are siblings\.",
+        "brother": r"(.+) is a brother of (.+)\.",
+        "sister": r"(.+) is a sister of (.+)\.",
+        "father": r"(.+) is the father of (.+)\.",
+        "mother": r"(.+) is the mother of (.+)\.",
+        "parents": r"(.+) and (.+) are the parents of (.+)\.",
+        "grandmother": r"(.+) is a grandmother of (.+)\.",
+        "grandfather": r"(.+) is a grandfather of (.+)\.",
+        "child": r"(.+) is a child of (.+)\.",
+        "children": r"(.+) and (.+) are children of (.+)\.",
+        "daughter": r"(.+) is a daughter of (.+)\.",
+        "son": r"(.+) is a son of (.+)\.",
+        "uncle": r"(.+) is an uncle of (.+)\.",
+        "aunt": r"(.+) is an aunt of (.+)\.",
         
 
         "siblings_q": r"Are (.+) and (.+) siblings\?",
@@ -53,13 +52,26 @@ def match_pattern(user_input):
 
 
 def process_statement(pattern_type, args):
-    """Process statements and assert them into the Prolog knowledge base."""
+ 
     try:
         if pattern_type == "siblings":
             person1, person2 = args
             prolog.assertz(f"sibling({person1.lower()}, {person2.lower()})")
-            prolog.assertz(f"sibling({person2.lower()}, {person1.lower()})")  # Sibling is symmetric
+            prolog.assertz(f"sibling({person2.lower()}, {person1.lower()})")
+            
+
+            parents1 = list(prolog.query(f"parent(P, {person1.lower()})"))
+            for parent in parents1:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {person2.lower()})")
+            
+            parents2 = list(prolog.query(f"parent(P, {person2.lower()})"))
+            for parent in parents2:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {person1.lower()})")
+            
             return f"Learned that {person1} and {person2} are siblings."
+
 
         elif pattern_type == "father":
             father, child = args
@@ -72,6 +84,44 @@ def process_statement(pattern_type, args):
             prolog.assertz(f"parent({mother.lower()}, {child.lower()})")
             prolog.assertz(f"female({mother.lower()})")
             return f"Learned that {mother} is the mother of {child}."
+        
+        elif pattern_type == "brother":
+            brother, sibling = args
+            prolog.assertz(f"male({brother.lower()})") 
+            prolog.assertz(f"sibling({brother.lower()}, {sibling.lower()})")
+            prolog.assertz(f"sibling({sibling.lower()}, {brother.lower()})") 
+
+
+            parents_of_sibling = list(prolog.query(f"parent(P, {sibling.lower()})"))
+            for parent in parents_of_sibling:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {brother.lower()})")
+
+            parents_of_brother = list(prolog.query(f"parent(P, {brother.lower()})"))
+            for parent in parents_of_brother:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {sibling.lower()})")
+
+            return f"Learned that {brother} is a brother of {sibling}."
+
+        elif pattern_type == "sister":
+            sister, sibling = args
+            prolog.assertz(f"female({sister.lower()})") 
+            prolog.assertz(f"sibling({sister.lower()}, {sibling.lower()})")
+            prolog.assertz(f"sibling({sibling.lower()}, {sister.lower()})")  
+
+            parents_of_sibling = list(prolog.query(f"parent(P, {sibling.lower()})"))
+            for parent in parents_of_sibling:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {sister.lower()})")
+
+            parents_of_sister = list(prolog.query(f"parent(P, {sister.lower()})"))
+            for parent in parents_of_sister:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {sibling.lower()})")
+
+            return f"Learned that {sister} is a sister of {sibling}."
+
 
         elif pattern_type == "grandfather":
             grandfather, grandchild = args
@@ -142,13 +192,13 @@ def process_statement(pattern_type, args):
 
 
 def process_question(pattern_type, args):
-    """Process a question by querying the Prolog knowledge base."""
+
     try:
         if pattern_type.endswith("_q"):  # Yes/No Questions
             relation = pattern_type.replace("_q", "")
             query = build_prolog_query(relation, args)
             result = list(prolog.query(query))
-            return "yes" if result else "no"
+            return "Yes" if result else "No"
 
         elif pattern_type.startswith("Who"):  # Who/What Questions
             relation = pattern_type.replace("_q", "")
@@ -163,7 +213,7 @@ def process_question(pattern_type, args):
         return "That’s impossible!"
 
 def build_prolog_query(relation, args, find_all=False):
-    """Generate a Prolog query based on the relationship and arguments."""
+    
     if relation == "siblings":
         if find_all:
             return f"sibling(X, {args[0].lower()})"
@@ -252,8 +302,7 @@ def build_prolog_query(relation, args, find_all=False):
 
 
 def chatbot():
-    """Main chatbot loop."""
-    print("Welcome to the Intelligent Family Relationship Chatbot!")
+    print("Welcome to the Family Relationship Chatbot!")
     print("Type 'exit' to leave the chat.")
     
     while True:
