@@ -17,6 +17,7 @@ def match_pattern(user_input):
         "father": r"(.+) is the father of (.+)",
         "mother": r"(.+) is the mother of (.+)",
         "parents": r"(.+) and (.+) are the parents of (.+)",
+
         "grandmother": r"(.+) is a grandmother of (.+)",
         "grandfather": r"(.+) is a grandfather of (.+)",
         "child": r"(.+) is a child of (.+)",
@@ -52,7 +53,7 @@ def match_pattern(user_input):
 
 
 def process_statement(pattern_type, args):
-   
+    """Process statements and assert them into the Prolog knowledge base."""
     try:
         if pattern_type == "siblings":
             person1, person2 = args
@@ -134,7 +135,9 @@ def process_statement(pattern_type, args):
         return "I couldn't understand that statement."
 
     except Exception as e:
+        print(f"Error: {e}")
         return "That’s impossible!"
+
 
 
 
@@ -147,7 +150,7 @@ def process_question(pattern_type, args):
             result = list(prolog.query(query))
             return "yes" if result else "no"
 
-        elif pattern_type.startswith("who"):  # Who/What Questions
+        elif pattern_type.startswith("Who"):  # Who/What Questions
             relation = pattern_type.replace("_q", "")
             query = build_prolog_query(relation, args, find_all=True)
             results = list(prolog.query(query))
