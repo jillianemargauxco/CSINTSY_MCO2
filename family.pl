@@ -37,5 +37,22 @@ aunt(X, Y) :- sibling(X, P), parent(P, Y), female(X).
 
 relatives(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
 
+relatives(X, Y) :- parent(X, Y).         
+relatives(X, Y) :- parent(Y, X).              
+relatives(X, Y) :- sibling(X, Y).              
+relatives(X, Y) :- grandparent(X, Y).          
+relatives(X, Y) :- grandparent(Y, X).          
+relatives(X, Y) :- uncle(X, Y).                
+relatives(X, Y) :- aunt(X, Y).                
+relatives(X, Y) :- uncle(Y, X).             
+relatives(X, Y) :- aunt(Y, X).                 
+
+relatives(X, Y) :- parent(X, Y).
+relatives(X, Y) :- parent(Y, X).
+relatives(X, Y) :- sibling(X, Y).
+relatives(X, Y) :- parent(Z, X), relatives(Z, Y).
+relatives(X, Y) :- parent(Z, Y), relatives(Z, X).
+
+
 
 

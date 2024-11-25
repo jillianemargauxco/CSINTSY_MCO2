@@ -126,6 +126,92 @@ def assert_if_not_exists(fact):
     prolog.assertz(fact)
     return f"Successfully asserted the fact '{fact}'."
 
+def is_parent_or_child(person1, person2):
+    parent_fact = list(prolog.query(f"mother({person1.lower()}, {person2.lower()})"))
+    if parent_fact:
+        return True
+    
+    parent_fact = list(prolog.query(f"mother({person2.lower()}, {person1.lower()})"))
+    if parent_fact:
+        return True
+    
+    parent_fact = list(prolog.query(f"father({person1.lower()}, {person2.lower()})"))
+    if parent_fact:
+        return True
+    
+    parent_fact = list(prolog.query(f"father({person2.lower()}, {person1.lower()})"))
+    if parent_fact:
+        return True
+
+    return False
+
+def is_grandparent(person1, person2):
+    grandparent_fact = list(prolog.query(f"grandmother({person1.lower()}, {person2.lower()})"))
+    if grandparent_fact:
+        return True
+    
+    grandparent_fact = list(prolog.query(f"grandmother({person2.lower()}, {person1.lower()})"))
+    if grandparent_fact:
+        return True
+    
+    grandparent_fact = list(prolog.query(f"grandfather({person1.lower()}, {person2.lower()})"))
+    if grandparent_fact:
+        return True
+    
+    grandparent_fact = list(prolog.query(f"grandfather({person2.lower()}, {person1.lower()})"))
+    if grandparent_fact:
+        return True
+
+    return False
+
+def is_aunt_uncle(person1, person2):
+    aunt_fact = list(prolog.query(f"aunt({person1.lower()}, {person2.lower()})"))
+    if aunt_fact:
+        return True
+    
+    aunt_fact = list(prolog.query(f"aunt({person2.lower()}, {person1.lower()})"))
+    if aunt_fact:
+        return True
+    
+    uncle_fact = list(prolog.query(f"uncle({person1.lower()}, {person2.lower()})"))
+    if uncle_fact:
+        return True
+    
+    uncle_fact = list(prolog.query(f"uncle({person2.lower()}, {person1.lower()})"))
+    if uncle_fact:
+        return True
+
+    return False
+
+
+def is_sibling(person1, person2):
+    sibling_fact = list(prolog.query(f"sibling({person1.lower()}, {person2.lower()})"))
+    if sibling_fact:
+        return True
+    
+    sibling_fact = list(prolog.query(f"sibling({person2.lower()}, {person1.lower()})"))
+    if sibling_fact:
+        return True
+    
+    sister_fact = list(prolog.query(f"sister({person1.lower()}, {person2.lower()})"))
+    if  sister_fact:
+        return True
+    
+    sister_fact = list(prolog.query(f"sister({person2.lower()}, {person1.lower()})"))
+    if  sister_fact:
+        return True
+    
+    brother_fact = list(prolog.query(f"brother({person1.lower()}, {person2.lower()})"))
+    if brother_fact:
+        return True
+    
+    brother_fact = list(prolog.query(f"brother({person2.lower()}, {person1.lower()})"))
+    if brother_fact:
+        return True
+
+    return False
+
+
 
 def process_statement(pattern_type, args):
     try:
@@ -150,7 +236,8 @@ def process_statement(pattern_type, args):
          
             if person1.lower() == person2.lower():
                 return "A person cannot be their own sibling."
-
+            
+            is_aunt_uncle(person1, person2)
        
             parents1 = list(prolog.query(f"parent(P, {person1.lower()})"))
             parents2 = list(prolog.query(f"parent(P, {person2.lower()}))"))
@@ -172,6 +259,18 @@ def process_statement(pattern_type, args):
         elif pattern_type == "father":
             father, child = args
 
+            if is_parent_or_child(father, child):
+                return f"{father} cannot be a father to {child} due to an existing parent/child relationship."
+
+            if is_sibling(father, child):
+                return f"{father} cannot be a father to {child} due to an sibling relationship."
+            
+            if is_aunt_uncle(father, child):
+                return f"{father} cannot be a father to {child} due to an existing relationship."
+            
+            if is_grandparent(father, child):
+                return f"{father} cannot be a father to {child} due to an existing relationship."
+
             if father.lower() == child.lower():
                 return "A person cannot be their own father."
             
@@ -190,6 +289,18 @@ def process_statement(pattern_type, args):
 
         elif pattern_type == "mother":
             mother, child = args
+
+            if is_parent_or_child(mother, child):
+                return f"{mother} cannot be a mother to {child} due to an existing parent/child relationship."
+
+            if is_sibling(mother, child):
+                return f"{mother} cannot be a mother to {child} due to an sibling relationship."
+            
+            if is_aunt_uncle(mother, child):
+                return f"{mother} cannot be a mother to {child} due to an existing relationship."
+            
+            if is_grandparent(mother, child):
+                return f"{mother} cannot be a mother to {child} due to an existing relationship."
 
             if mother.lower() == child.lower():
                 return "A person cannot be their own mother."
@@ -210,7 +321,18 @@ def process_statement(pattern_type, args):
         elif pattern_type == "brother":
             brother, sibling = args
 
-          
+            if is_parent_or_child(brother, sibling):
+                return f"{brother} cannot be a brother to {sibling} due to an existing parent/child relationship."
+
+            if is_sibling(brother, sibling):
+                return f"{brother} cannot be a brother to {sibling} due to an sibling relationship."
+            
+            if is_aunt_uncle(brother, sibling):
+                return f"{brother} cannot be a brother to {sibling} due to an existing relationship."
+            
+            if is_grandparent(brother, sibling):
+                return f"{brother} cannot be a brother to {sibling} due to an existing relationship."
+
             if not check_gender_compatibility(brother, 'male'):
                 return f"{brother} cannot be a brother because they are not male."
 
@@ -228,18 +350,30 @@ def process_statement(pattern_type, args):
                 parent_name = parent["P"]
                 prolog.assertz(f"parent({parent_name}, {sibling.lower()})")
 
+            prolog.assertz(f"male({brother.lower()})")
             return f"Learned that {brother} is a brother of {sibling}."
 
         elif pattern_type == "sister":
             sister, sibling = args
 
+            if is_parent_or_child(sister, sibling):
+                return f"{sister} cannot be a sister to {sibling} due to an existing parent/child relationship."
 
+            if is_sibling(sister, sibling):
+                return f"{sister} cannot be a sister to {sibling} due to an sibling relationship."
+            
+            if is_aunt_uncle(sister, sibling):
+                return f"{sister} cannot be a sister to {sibling} due to an existing relationship."
+            
+            if is_grandparent(sister, sibling):
+                return f"{sister} cannot be a sister to {sibling} due to an existing relationship."
+            
             if not check_gender_compatibility(sister, 'female'):
                 return f"{sister} cannot be a sister because they are not female."
 
             prolog.assertz(f"sibling({sister.lower()}, {sibling.lower()})")
             prolog.assertz(f"sibling({sibling.lower()}, {sister.lower()})")
-
+            
         
             parents_of_sibling = list(prolog.query(f"parent(P, {sibling.lower()})"))
             for parent in parents_of_sibling:
@@ -251,11 +385,23 @@ def process_statement(pattern_type, args):
                 parent_name = parent["P"]
                 prolog.assertz(f"parent({parent_name}, {sibling.lower()})")
 
+            prolog.assertz(f"female({sister.lower()})")
             return f"Learned that {sister} is a sister of {sibling}."
 
         elif pattern_type == "grandfather":
             grandfather, grandchild = args
 
+            if is_parent_or_child(grandfather, grandchild):
+                return f"{grandfather} cannot be a grandfather to {grandchild} due to an existing parent/child relationship."
+
+            if is_sibling(grandfather, grandchild):
+                return f"{grandfather} cannot be a grandfather to {grandchild} due to an sibling relationship."
+            
+            if is_aunt_uncle(grandfather, grandchild):
+                return f"{grandfather} cannot be a grandfather to {grandchild} due to an existing relationship."
+            
+            if is_grandparent(grandfather, grandchild):
+                return f"{grandfather} cannot be a grandfather to {grandchild} due to an existing relationship."
    
             if not check_gender_compatibility(grandfather, 'male'):
                 return f"{grandfather} cannot be a grandfather because they are not male."
@@ -266,6 +412,17 @@ def process_statement(pattern_type, args):
         elif pattern_type == "grandmother":
             grandmother, grandchild = args
 
+            if is_parent_or_child(grandmother, grandchild):
+                return f"{grandmother} cannot be a grandmother to {grandchild} due to an existing parent/child relationship."
+
+            if is_sibling(grandmother, grandchild):
+                return f"{grandmother} cannot be a grandmother to {grandchild} due to an sibling relationship."
+            
+            if is_aunt_uncle(grandmother, grandchild):
+                return f"{grandmother} cannot be a grandmother to {grandchild} due to an existing relationship."
+            
+            if is_grandparent(grandmother, grandchild):
+                return f"{grandmother} cannot be a grandmother to {grandchild} due to an existing relationship."
          
             if not check_gender_compatibility(grandmother, 'female'):
                 return f"{grandmother} cannot be a grandmother because they are not female."
@@ -278,6 +435,19 @@ def process_statement(pattern_type, args):
 
             if child.lower() == parent.lower():
                 return "A person cannot be their own child."
+            
+            if is_parent_or_child(parent, child):
+                return f"{parent} cannot be a parent to {child} due to an existing parent/child relationship."
+
+            if is_sibling(parent, child):
+                return f"{parent} cannot be a parent to {child} due to an sibling relationship."
+            
+            if is_aunt_uncle(parent, child):
+                return f"{parent} cannot be a parent to {child} due to an existing relationship."
+            
+            if is_grandparent(parent, child):
+                return f"{parent} cannot be a parent to {child} due to an existing relationship."
+            
 
             existing_parent = existing_parents(child)
             if existing_parent == "mother":
@@ -297,6 +467,18 @@ def process_statement(pattern_type, args):
 
             if son.lower() == parent.lower():
                 return "A person cannot be their own son."
+            
+            if is_parent_or_child(parent, son):
+                return f"{parent} cannot be a parent to {son} due to an existing parent/child relationship."
+
+            if is_sibling(parent, son):
+                return f"{parent} cannot be a parent to {son} due to an sibling relationship."
+            
+            if is_aunt_uncle(parent, son):
+                return f"{parent} cannot be a parent to {son} due to an existing relationship."
+            
+            if is_grandparent(parent, son):
+                return f"{parent} cannot be a parent to {son} due to an existing relationship."
 
             if not check_gender_compatibility(son, 'male'):
                 return f"{son} cannot be a son because they are not male."
@@ -312,6 +494,7 @@ def process_statement(pattern_type, args):
                 return f"Learned that {parent} is the mother of {son}."
 
             prolog.assertz(f"parent({parent.lower()}, {son.lower()})")
+            prolog.assertz(f"male({son.lower()})")
             return f"Learned that {son} is a son of {parent}."
 
         elif pattern_type == "daughter":
@@ -319,7 +502,19 @@ def process_statement(pattern_type, args):
 
             if daughter.lower() == parent.lower():
                 return "A person cannot be their own daughter."
+            
+            if is_parent_or_child(parent, daughter):
+                return f"{parent} cannot be a parent to {daughter} due to an existing parent/child relationship."
 
+            if is_sibling(parent, daughter):
+                return f"{parent} cannot be a parent to {daughter} due to an sibling relationship."
+            
+            if is_aunt_uncle(parent, daughter):
+                return f"{parent} cannot be a parent to {daughter} due to an existing relationship."
+            
+            if is_grandparent(parent, daughter):
+                return f"{parent} cannot be a parent to {daughter} due to an existing relationship."
+            
             if not check_gender_compatibility(daughter, 'female'):
                 return f"{daughter} cannot be a daughter because they are not female."
             
@@ -334,29 +529,81 @@ def process_statement(pattern_type, args):
                 return f"Learned that {parent} is the mother of {daughter}."
 
             prolog.assertz(f"parent({parent.lower()}, {daughter.lower()})")
+            prolog.assertz(f"female({daughter.lower()})")
             return f"Learned that {daughter} is a daughter of {parent}."
 
         elif pattern_type == "uncle":
             uncle, nephew_niece = args
 
+
             if not check_gender_compatibility(uncle, 'male'):
                 return f"{uncle} cannot be an uncle because they are not male."
+            
+            if is_parent_or_child(uncle, nephew_niece):
+                return f"{uncle} cannot be an uncle to {nephew_niece} due to an existing parent/child relationship."
 
+            if is_sibling(uncle, nephew_niece):
+                return f"{uncle} cannot be an uncle to {nephew_niece} due to an sibling relationship."
+            
+            if is_aunt_uncle(uncle, nephew_niece):
+                return f"{uncle} cannot be an uncle to {nephew_niece} due to an existing relationship."
+            
+            if is_grandparent(uncle, nephew_niece):
+                return f"{uncle} cannot be an uncle to {nephew_niece} due to an existing relationship."
+            
             prolog.assertz(f"uncle({uncle.lower()}, {nephew_niece.lower()})")
+            prolog.assertz(f"male({uncle.lower()})")
             return f"Learned that {uncle} is an uncle of {nephew_niece}."
 
         elif pattern_type == "aunt":
             aunt, nephew_niece = args
+
+            if is_parent_or_child(aunt, nephew_niece):
+                return f"{aunt} cannot be an aunt to {nephew_niece} due to an existing parent/child relationship."
+
+            if is_sibling(aunt, nephew_niece):
+                return f"{aunt} cannot be an aunt to {nephew_niece} due to an sibling relationship."
+            
+            if is_aunt_uncle(aunt, nephew_niece):
+                return f"{aunt} cannot be an aunt to {nephew_niece} due to an existing relationship."
+            
+            if is_grandparent(aunt, nephew_niece):
+                return f"{aunt} cannot be an aunt to {nephew_niece} due to an existing relationship."
 
           
             if not check_gender_compatibility(aunt, 'female'):
                 return f"{aunt} cannot be an aunt because they are not female."
 
             prolog.assertz(f"aunt({aunt.lower()}, {nephew_niece.lower()})")
+            prolog.assertz(f"female({aunt.lower()})")
             return f"Learned that {aunt} is an aunt of {nephew_niece}."
 
         elif pattern_type == "parents":
             parent1, parent2, child = args
+
+            if is_parent_or_child(parent1, child):
+                return f"{parent1} cannot be a parent to {child} due to an existing parent/child relationship."
+            
+            if is_parent_or_child(parent2, child):
+                return f"{parent2} cannot be a parent to {child} due to an existing parent/child relationship."
+
+            if is_sibling(parent1, child):
+                return f"{parent1} cannot be a parent to {child} due to an sibling relationship."
+            
+            if is_sibling(parent2, child):
+                return f"{parent2} cannot be a parent to {child} due to an sibling relationship."
+
+            if is_aunt_uncle(parent1, child):
+                return f"{parent1} cannot be an parent to {child} due to an existing relationship."
+            
+            if is_grandparent(parent1, child):
+                return f"{parent1} cannot be an parent to {child} due to an existing relationship."
+            
+            if is_aunt_uncle(parent2, child):
+                return f"{parent2} cannot be an parent to {child} due to an existing relationship."
+            
+            if is_grandparent(parent2, child):
+                return f"{parent2} cannot be an parent to {child} due to an existing relationship."
 
             if parent1.lower() == child.lower() or parent2.lower() == child.lower():
                 return "A person cannot be their own parent."
@@ -373,6 +620,43 @@ def process_statement(pattern_type, args):
         elif pattern_type == "children":
          
             child1, child2, child3, parent = args
+
+            if is_parent_or_child(parent, child1):
+                return f"{parent} cannot be a parent to {child1} due to an existing parent/child relationship."
+            
+            if is_parent_or_child(parent, child2):
+                return f"{parent} cannot be a parent to {child2} due to an existing parent/child relationship."
+            
+            if is_parent_or_child(parent, child3):
+                return f"{parent} cannot be a parent to {child3} due to an existing parent/child relationship."
+
+            if is_sibling(parent, child1):
+                return f"{parent} cannot be a parent to {child1} due to an sibling relationship."
+            
+            if is_sibling(parent, child2):
+                return f"{parent} cannot be a parent to {child2} due to an sibling relationship."
+            
+            if is_sibling(parent, child3):
+                return f"{parent} cannot be a parent to {child3} due to an sibling relationship."
+            
+            
+            if is_aunt_uncle(parent, child1):
+                return f"{parent} cannot be an parent to {child1} due to an existing relationship."
+            
+            if is_grandparent(parent, child1):
+                return f"{parent} cannot be an parent to {child1} due to an existing relationship."
+            
+            if is_aunt_uncle(parent, child2):
+                return f"{parent} cannot be an parent to {child2} due to an existing relationship."
+            
+            if is_grandparent(parent, child2):
+                return f"{parent} cannot be an parent to {child2} due to an existing relationship."
+            
+            if is_aunt_uncle(parent, child3):
+                return f"{parent} cannot be an parent to {child3} due to an existing relationship."
+            
+            if is_grandparent(parent, child3):
+                return f"{parent} cannot be an parent to {child3} due to an existing relationship."
 
            
             for child in [child1, child2, child3]:
