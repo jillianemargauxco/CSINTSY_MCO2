@@ -39,7 +39,8 @@ relatives(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
 
 relatives(X, Y) :- parent(X, Y).         
 relatives(X, Y) :- parent(Y, X).              
-relatives(X, Y) :- sibling(X, Y).              
+relatives(X, Y) :- sibling(X, Y).  
+
 relatives(X, Y) :- grandparent(X, Y).          
 relatives(X, Y) :- grandparent(Y, X).          
 relatives(X, Y) :- uncle(X, Y).                
@@ -50,9 +51,21 @@ relatives(X, Y) :- aunt(Y, X).
 relatives(X, Y) :- parent(X, Y).
 relatives(X, Y) :- parent(Y, X).
 relatives(X, Y) :- sibling(X, Y).
+
+relatives(X, Y) :- daughter(X, Y).             
+relatives(X, Y) :- son(X, Y).                   
+relatives(X, Y) :- sister(X, Y).                
+relatives(X, Y) :- brother(X, Y).               
+
+relatives(X, Y) :- mother(X, Y).                
+relatives(X, Y) :- father(X, Y).               
+
+relatives(X, Y) :- grandfather(X, Y).          
+relatives(X, Y) :- grandmother(X, Y).  
+
 relatives(X, Y) :- parent(Z, X), relatives(Z, Y).
 relatives(X, Y) :- parent(Z, Y), relatives(Z, X).
 
-
+        
 
 

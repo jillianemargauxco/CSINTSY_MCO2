@@ -718,11 +718,15 @@ def process_question(pattern_type, args):
             results = list(prolog.query(query))
 
             if results:
+              
                 answers = [result["X"] for result in results]
-                if len(answers) == 1:
-                    return f"The {relation} of {args[0]} is {answers[0]}."
+
+                unique_answers = list(set(answers))
+
+                if len(unique_answers) == 1:
+                    return f"The {relation} of {args[0]} is {unique_answers[0]}."
                 else:
-                    return f"The {relation} of {args[0]} are {', '.join(answers)}."
+                    return f"The {relation} of {args[0]} are {', '.join(unique_answers)}."
             else:
                 return f"No {relation} found for {args[0]}."
 
