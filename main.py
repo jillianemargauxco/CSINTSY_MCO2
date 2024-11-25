@@ -236,16 +236,16 @@ def process_statement(pattern_type, args):
                 return "A person cannot be their own sibling."
             
             if is_parent_or_child(person1, person2):
-                return f"{person1} cannot be a brother to {person2} due to an existing parent/child relationship."
+                return f"{person1} cannot be a sibling to {person2} due to an existing parent/child relationship."
 
             if is_sibling(person1, person2):
-                return f"{person1} cannot be a brother to {person2} due to an sibling relationship."
+                return f"{person1} cannot be a sibling to {person2} due to an sibling relationship."
             
             if is_aunt_uncle(person1, person2):
-                return f"{person1} cannot be a brother to {person2} due to an existing relationship."
+                return f"{person1} cannot be a sibling to {person2} due to an existing relationship."
             
             if is_grandparent(person1, person2):
-                return f"{person1} cannot be a brother to {person2} due to an existing relationship."
+                return f"{person1} cannot be a sibling to {person2} due to an existing relationship."
             
        
             parents1 = list(prolog.query(f"parent(P, {person1.lower()})"))
