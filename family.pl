@@ -29,11 +29,20 @@ daughter(X, Y) :- child(X, Y), female(X).
 son(X, Y) :- child(X, Y), male(X).
 
 grandparent(X, Y) :- parent(X, Z), parent(Z, Y).
+
 grandfather(X, Y) :- grandparent(X, Y), male(X).
+grandfather(X, Y) :- sibling(Y, Z), grandparent(X, Z).
+
 grandmother(X, Y) :- grandparent(X, Y), female(X).
+grandmother(X, Y) :- sibling(Y, Z), grandparent(X, Z).
+
 
 uncle(X, Y) :- sibling(X, P), parent(P, Y), male(X).
+
+
 aunt(X, Y) :- sibling(X, P), parent(P, Y), female(X).
+
+
 
 relatives(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
 
