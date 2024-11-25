@@ -247,41 +247,37 @@ def process_statement(pattern_type, args):
             if is_grandparent(person1, person2):
                 return f"{person1} cannot be a sibling to {person2} due to an existing relationship."
             
-       
-            parents1 = list(prolog.query(f"parent(P, {person1.lower()})"))
-            parents2 = list(prolog.query(f"parent(P, {person2.lower()}))"))
             
-            if not parents1 or not parents2:
-                return f"No common parent found for {person1} and {person2}."
-
-            for parent in parents1:
-                parent_name = parent['P']
-                prolog.assertz(f"parent({parent_name}, {person2.lower()})")
-            
-            for parent in parents2:
-                parent_name = parent['P']
+            parents_of_person1 = list(prolog.query(f"parent(P, {person1.lower()})"))
+            for parent in parents_of_person1:
+                parent_name = parent["P"]
                 prolog.assertz(f"parent({parent_name}, {person1.lower()})")
+
+            parents_of_person2 = list(prolog.query(f"parent(P, {person2.lower()})"))
+            for parent in parents_of_person2:
+                parent_name = parent["P"]
+                prolog.assertz(f"parent({parent_name}, {person2.lower()})")
             
             uncles_of_person1 = list(prolog.query(f"uncle(U, {person1.lower()})"))
             for uncle in uncles_of_person1:
                 uncle_name = uncle["U"]
-                prolog.assertz(f"uncle({uncle_name}, {person2.lower()})")
+                prolog.assertz(f"uncle({uncle_name}, {person1.lower()})")
 
             aunts_of_person1 = list(prolog.query(f"aunt(A, {person1.lower()})"))
             for aunt in aunts_of_person1:
                 aunt_name = aunt["A"]
-                prolog.assertz(f"aunt({aunt_name}, {person2.lower()})")
+                prolog.assertz(f"aunt({aunt_name}, {person1.lower()})")
 
            
             uncles_of_person2 = list(prolog.query(f"uncle(U, {person2.lower()})"))
             for uncle in uncles_of_person2:
                 uncle_name = uncle["U"]
-                prolog.assertz(f"uncle({uncle_name}, {person1.lower()})")
+                prolog.assertz(f"uncle({uncle_name}, {person2.lower()})")
 
             aunts_of_person2 = list(prolog.query(f"aunt(A, {person2.lower()})"))
             for aunt in aunts_of_person2:
                 aunt_name = aunt["A"]
-                prolog.assertz(f"aunt({aunt_name}, {person1.lower()})")
+                prolog.assertz(f"aunt({aunt_name}, {person2.lower()})")
 
        
             grandparents_of_person1 = list(prolog.query(f"grandparent(G, {person1.lower()})"))
@@ -830,6 +826,7 @@ def process_statement(pattern_type, args):
         return "I couldn't understand that statement."
     
     except Exception as e:
+        print(f"Error: {e}")
         return "That’s impossible!"
 
 
