@@ -48,7 +48,7 @@ def match_pattern(user_input):
         "daughter_q": r"Is (.+) a daughter of (.+)\?",
         "son_q": r"Is (.+) a son of (.+)\?",
         "child_q": r"Is (.+) a child of (.+)\?",
-        "children_q": r"Are (.+) and (.+) children of (.+)\?",
+        "children_q": r"Are (.+), (.+) and (.+) children of (.+)\?",
         "uncle_q": r"Is (.+) an uncle of (.+)\?",
         "aunt_q": r"Is (.+) an aunt of (.+)\?",
         "relatives_q": r"Are (.+) and (.+) relatives\?",
@@ -104,13 +104,21 @@ def existing_parents(child):
     return None  
 
 def check_if_mother_exists(child, mother):
-    existing_mother = list(prolog.query(f"mother(X, {child.lower()})"))
-    return bool(existing_mother)
+    existing_mothers = list(prolog.query(f"mother(X, {child.lower()})"))
+    for existing_mother in existing_mothers:
+        if existing_mother["X"].lower() == mother.lower():
+            return False  
+        if existing_mother["X"].lower() != mother.lower():
+            return True
 
 
 def check_if_father_exists(child, father):
-    existing_father = list(prolog.query(f"father(X, {child.lower()})"))
-    return bool(existing_father)
+    existing_fathers = list(prolog.query(f"father(X, {child.lower()})"))
+    for existing_father in existing_fathers:
+        if existing_father["X"].lower() == father.lower():
+            return False  
+        if existing_father["X"].lower() != father.lower():
+            return True
 
 def assert_if_not_exists(fact):
     existing_fact = list(prolog.query(fact))
@@ -210,6 +218,10 @@ def check_if_parent_exists(child, parent):
     existing_parent = list(prolog.query(f"parent({parent.lower()}, {child.lower()})"))
     return bool(existing_parent)
 
+def get_existing_parents(child):
+    parents = prolog.query(f"parent(X, {child.lower()})")
+    return {result["X"] for result in parents}
+
 
 
 
@@ -303,8 +315,13 @@ def process_statement(pattern_type, args):
         elif pattern_type == "father":
             father, child = args
 
-            if is_parent_or_child(father, child):
-                return f"{father} cannot be a father to {child} due to an existing parent/child relationship."
+            parent_fact = list(prolog.query(f"mother({father.lower()}, {child.lower()})"))
+            if parent_fact:
+                return f"{father} cannot be a father to {child} due to an existing mother relationship."
+            
+            parent_fact = list(prolog.query(f"mother({child.lower()}, {father.lower()})"))
+            if parent_fact:
+                return f"{father} cannot be a father to {child} due to an existing mother relationship."
 
             if is_sibling(father, child):
                 return f"{father} cannot be a father to {child} due to a sibling relationship."
@@ -321,9 +338,6 @@ def process_statement(pattern_type, args):
             if not check_gender_compatibility(father, 'male'):
                 return f"{father} cannot be a father because they are not male."
             
-            if check_for_circular_relationship(father, child):
-                return f"A circular relationship cannot be established between {father} and {child}."
-      
             if check_if_father_exists(child, father):
                 return f"{child} already has a father."
             
@@ -340,8 +354,13 @@ def process_statement(pattern_type, args):
         elif pattern_type == "mother":
             mother, child = args
 
-            if is_parent_or_child(mother, child):
-                return f"{mother} cannot be a mother to {child} due to an existing parent/child relationship."
+            parent_fact = list(prolog.query(f"father({mother.lower()}, {child.lower()})"))
+            if parent_fact:
+                return f"{mother} cannot be a mother to {child} due to an existing father relationship."
+            
+            parent_fact = list(prolog.query(f"father({child.lower()}, {mother.lower()})"))
+            if parent_fact:
+                return f"{mother} cannot be a mother to {child} due to an existing father relationship."
 
             if is_sibling(mother, child):
                 return f"{mother} cannot be a mother to {child} due to a sibling relationship."
@@ -357,9 +376,6 @@ def process_statement(pattern_type, args):
 
             if not check_gender_compatibility(mother, 'female'):
                 return f"{mother} cannot be a mother because they are not female."
-            
-            if check_for_circular_relationship(mother, child):
-                return f"A circular relationship cannot be established between {mother} and {child}."
 
             if check_if_mother_exists(child, mother):
                 return f"{child} already has a mother."
@@ -740,11 +756,45 @@ def process_statement(pattern_type, args):
         elif pattern_type == "parents":
             parent1, parent2, child = args
 
-            if is_parent_or_child(parent1, child):
-                return f"{parent1} cannot be a parent to {child} due to an existing parent/child relationship."
+            if not check_if_mother_exists(child, parent1):
+                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
+                prolog.assertz(f"female({parent1.lower()})")
+                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
+                prolog.assertz(f"male({parent2.lower()})")
+                return f"{child} already has a mother. Learned {parent2.lower()} is the father of {child.lower()}"
             
-            if is_parent_or_child(parent2, child):
-                return f"{parent2} cannot be a parent to {child} due to an existing parent/child relationship."
+            if not check_if_mother_exists(child, parent2):
+                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
+                prolog.assertz(f"female({parent2.lower()})")
+                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
+                prolog.assertz(f"male({parent1.lower()})")
+                return f"{child} already has a mother. Learned {parent1.lower()} is the father of {child.lower()}"
+
+            if not check_if_father_exists(child, parent1):
+                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
+                prolog.assertz(f"male({parent1.lower()})")
+                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
+                prolog.assertz(f"female({parent2.lower()})")
+                return f"{child} already has a father. Learned {parent2.lower()} is the mother of {child.lower()}"
+            
+            if not check_if_father_exists(child, parent2):
+                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
+                prolog.assertz(f"male({parent2.lower()})")
+                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
+                prolog.assertz(f"female({parent1.lower()})")
+                return f"{child} already has a father. Learned {parent1.lower()} is the mother of {child.lower()}"
+            
+            if check_if_mother_exists(child, parent1):
+                return f"{parent1} cannot be an mother to {child} due to an existing relationship."
+
+            if check_if_father_exists(child, parent1):
+                return f"{parent1} cannot be an father to {child} due to an existing relationship."
+            
+            if check_if_mother_exists(child, parent2):
+                return f"{parent2} cannot be an mother to {child} due to an existing relationship."
+
+            if check_if_father_exists(child, parent2):
+                return f"{parent2} cannot be an father to {child} due to an existing relationship."
 
             if is_sibling(parent1, child):
                 return f"{parent1} cannot be a parent to {child} due to a sibling relationship."
@@ -787,7 +837,6 @@ def process_statement(pattern_type, args):
 
         elif pattern_type == "children":
             child1, child2, child3, parent = args
-
            
             for child in [child1, child2, child3]:
                 if is_parent_or_child(parent, child):
@@ -819,7 +868,14 @@ def process_statement(pattern_type, args):
             
             
             for child in [child1, child2, child3]:
+                current_parents = get_existing_parents(child) 
+                print(current_parents)
+                if parent.lower() in current_parents:
+                    continue 
+                if len(current_parents) >= 2:
+                    return f"Cannot add {parent} as a parent to {child}. A child can have at most two parents: {', '.join(current_parents)}."
                 prolog.assertz(f"parent({parent.lower()}, {child.lower()})")
+                
 
             return f"Learned that {child1}, {child2}, and {child3} are children of {parent}."
 
@@ -937,13 +993,19 @@ def build_prolog_query(relation, args, find_all=False):
         if find_all:
             return f"parent(X, {args[0].lower()})"
         else:
-            return f"parent({args[0].lower()}, {args[1].lower()})"
+            parent1 = args[0].lower()
+            parent2 = args[1].lower()
+            child = args[2].lower()
+            return f"parent({parent1}, {child}), parent({parent2}, {child})"
 
     elif relation == "children":
         if find_all:
-            return f"child(X, {args[0].lower()})"
+            return f"parent({args[0].lower()}, X)"
         else:
-            return f"child({args[0].lower()}, {args[1].lower()})"
+            children_list = ', '.join(args[:-1])
+            parent = args[-1].lower()
+            return " , ".join([f"parent({parent}, {child.lower()})" for child in args[:-1]])
+
         
     elif relation == "child":
         if find_all:
