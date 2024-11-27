@@ -406,9 +406,6 @@ def process_statement(pattern_type, args):
 
             if is_parent_or_child(brother, sibling):
                 return f"{brother} cannot be a brother to {sibling} due to an existing parent/child relationship."
-
-            if is_sibling(brother, sibling):
-                return f"{brother} cannot be a brother to {sibling} due to a sibling relationship."
             
             if is_aunt_uncle(brother, sibling):
                 return f"{brother} cannot be a brother to {sibling} due to an existing relationship."
@@ -495,9 +492,6 @@ def process_statement(pattern_type, args):
 
             if is_parent_or_child(sister, sibling):
                 return f"{sister} cannot be a sister to {sibling} due to an existing parent/child relationship."
-
-            if is_sibling(sister, sibling):
-                return f"{sister} cannot be a sister to {sibling} due to a sibling relationship."
             
             if is_aunt_uncle(sister, sibling):
                 return f"{sister} cannot be a sister to {sibling} due to an existing relationship."
