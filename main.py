@@ -357,8 +357,7 @@ def process_statement(pattern_type, args):
             siblings = list(prolog.query(f"sibling(X, {child.lower()})"))
             for sibling in siblings:
                 sibling_name = sibling["X"]
-                if check_if_father_exists(sibling_name, father) == "father":
-                    prolog.assertz(f"parent({father.lower()}, {sibling_name})")
+                prolog.assertz(f"parent({father.lower()}, {sibling_name})")
 
             prolog.assertz(f"parent({father.lower()}, {child.lower()})")
             prolog.assertz(f"male({father.lower()})")
@@ -396,8 +395,7 @@ def process_statement(pattern_type, args):
             siblings = list(prolog.query(f"sibling(X, {child.lower()})"))
             for sibling in siblings:
                 sibling_name = sibling["X"]
-                if  check_if_mother_exists(sibling_name, mother) == "mother" :
-                    prolog.assertz(f"parent({mother.lower()}, {sibling_name})")
+                prolog.assertz(f"parent({mother.lower()}, {sibling_name})")
 
             prolog.assertz(f"parent({mother.lower()}, {child.lower()})")
             prolog.assertz(f"female({mother.lower()})")
