@@ -107,8 +107,10 @@ def check_if_mother_exists(child, mother):
     existing_mothers = list(prolog.query(f"mother(X, {child.lower()})"))
     for existing_mother in existing_mothers:
         if existing_mother["X"].lower() == mother.lower():
+            print(existing_mother["X"].lower())
             return False  
         if existing_mother["X"].lower() != mother.lower():
+            print(existing_mother["X"].lower())
             return True
 
 
@@ -258,40 +260,52 @@ def process_statement(pattern_type, args):
             
             if is_grandparent(person1, person2):
                 return f"{person1} cannot be a sibling to {person2} due to an existing relationship."
-            
-            
+
+
+            siblings_of_person1 = list(prolog.query(f"sibling(S, {person1.lower()})"))
+            siblings_of_person2 = list(prolog.query(f"sibling(S, {person2.lower()})"))
+
+            for sibling in siblings_of_person1:
+                sibling_name = sibling["S"]
+                prolog.assertz(f"sibling({sibling_name}, {person2.lower()})")
+                prolog.assertz(f"sibling({person2.lower()}, {sibling_name})")
+
+            for sibling in siblings_of_person2:
+                sibling_name = sibling["S"]
+                prolog.assertz(f"sibling({sibling_name}, {person1.lower()})")
+                prolog.assertz(f"sibling({person1.lower()}, {sibling_name})")
+        
             parents_of_person1 = list(prolog.query(f"parent(P, {person1.lower()})"))
             for parent in parents_of_person1:
                 parent_name = parent["P"]
-                prolog.assertz(f"parent({parent_name}, {person1.lower()})")
+                print(parent_name)
+                prolog.assertz(f"parent({parent_name}, {person2.lower()})")
 
             parents_of_person2 = list(prolog.query(f"parent(P, {person2.lower()})"))
             for parent in parents_of_person2:
                 parent_name = parent["P"]
-                prolog.assertz(f"parent({parent_name}, {person2.lower()})")
+                prolog.assertz(f"parent({parent_name}, {person1.lower()})")
             
             uncles_of_person1 = list(prolog.query(f"uncle(U, {person1.lower()})"))
             for uncle in uncles_of_person1:
                 uncle_name = uncle["U"]
-                prolog.assertz(f"uncle({uncle_name}, {person1.lower()})")
+                prolog.assertz(f"uncle({uncle_name}, {person2.lower()})")
 
             aunts_of_person1 = list(prolog.query(f"aunt(A, {person1.lower()})"))
             for aunt in aunts_of_person1:
                 aunt_name = aunt["A"]
-                prolog.assertz(f"aunt({aunt_name}, {person1.lower()})")
+                prolog.assertz(f"aunt({aunt_name}, {person2.lower()})")
 
-           
             uncles_of_person2 = list(prolog.query(f"uncle(U, {person2.lower()})"))
             for uncle in uncles_of_person2:
                 uncle_name = uncle["U"]
-                prolog.assertz(f"uncle({uncle_name}, {person2.lower()})")
+                prolog.assertz(f"uncle({uncle_name}, {person1.lower()})")
 
             aunts_of_person2 = list(prolog.query(f"aunt(A, {person2.lower()})"))
             for aunt in aunts_of_person2:
                 aunt_name = aunt["A"]
-                prolog.assertz(f"aunt({aunt_name}, {person2.lower()})")
+                prolog.assertz(f"aunt({aunt_name}, {person1.lower()})")
 
-       
             grandparents_of_person1 = list(prolog.query(f"grandparent(G, {person1.lower()})"))
             for grandparent in grandparents_of_person1:
                 grandparent_name = grandparent["G"]
@@ -299,7 +313,6 @@ def process_statement(pattern_type, args):
                     prolog.assertz(f"grandfather({grandparent_name}, {person2.lower()})")
                 elif check_gender_compatibility(grandparent_name, 'female'):
                     prolog.assertz(f"grandmother({grandparent_name}, {person2.lower()})")
-
             
             grandparents_of_person2 = list(prolog.query(f"grandparent(G, {person2.lower()})"))
             for grandparent in grandparents_of_person2:
@@ -310,6 +323,7 @@ def process_statement(pattern_type, args):
                     prolog.assertz(f"grandmother({grandparent_name}, {person1.lower()})")
 
             prolog.assertz(f"sibling({person1.lower()}, {person2.lower()})")
+            prolog.assertz(f"sibling({person2.lower()}, {person1.lower()})")
             return f"Learned that {person1} and {person2} are siblings."
 
         elif pattern_type == "father":
@@ -408,8 +422,18 @@ def process_statement(pattern_type, args):
             if not check_gender_compatibility(brother, 'male'):
                 return f"{brother} cannot be a brother because they are not male."
 
-            prolog.assertz(f"sibling({brother.lower()}, {sibling.lower()})")
-            prolog.assertz(f"sibling({sibling.lower()}, {brother.lower()})")
+            siblings_of_sibling = list(prolog.query(f"sibling(S, {sibling.lower()})"))
+            siblings_of_brother = list(prolog.query(f"sibling(S, {brother.lower()})"))
+
+            for person in siblings_of_sibling:
+                sibling_name = person["S"]
+                prolog.assertz(f"sibling({sibling_name}, {brother.lower()})")
+                prolog.assertz(f"sibling({brother.lower()}, {sibling_name})")
+
+            for person in siblings_of_brother:
+                sibling_name = person["S"]
+                prolog.assertz(f"sibling({sibling_name}, {sibling.lower()})")
+                prolog.assertz(f"sibling({sibling.lower()}, {sibling_name})")
             
     
             parents_of_sibling = list(prolog.query(f"parent(P, {sibling.lower()})"))
@@ -462,6 +486,9 @@ def process_statement(pattern_type, args):
                 elif check_gender_compatibility(grandparent_name, 'female'):
                     prolog.assertz(f"grandmother({grandparent_name}, {brother.lower()})")
                     prolog.assertz(f"grandmother({grandparent_name}, {sibling.lower()})")
+            
+            prolog.assertz(f"sibling({brother.lower()}, {sibling.lower()})")
+            prolog.assertz(f"sibling({sibling.lower()}, {brother.lower()})")
 
             prolog.assertz(f"male({brother.lower()})")
             return f"Learned that {brother} is a brother of {sibling}."
@@ -484,8 +511,18 @@ def process_statement(pattern_type, args):
             if not check_gender_compatibility(sister, 'female'):
                 return f"{sister} cannot be a sister because they are not female."
 
-            prolog.assertz(f"sibling({sister.lower()}, {sibling.lower()})")
-            prolog.assertz(f"sibling({sibling.lower()}, {sister.lower()})")
+            siblings_of_sibling = list(prolog.query(f"sibling(S, {sibling.lower()})"))
+            siblings_of_sister = list(prolog.query(f"sibling(S, {sister.lower()})"))
+
+            for person in siblings_of_sibling:
+                sibling_name = person["S"]
+                prolog.assertz(f"sibling({sibling_name}, {sister.lower()})")
+                prolog.assertz(f"sibling({sister.lower()}, {sibling_name})")
+
+            for person in siblings_of_sister:
+                sibling_name = person["S"]
+                prolog.assertz(f"sibling({sibling_name}, {sibling.lower()})")
+                prolog.assertz(f"sibling({sibling.lower()}, {sibling_name})")
             
             parents_of_sibling = list(prolog.query(f"parent(P, {sibling.lower()})"))
             for parent in parents_of_sibling:
@@ -538,7 +575,8 @@ def process_statement(pattern_type, args):
                     prolog.assertz(f"grandmother({grandparent_name}, {sister.lower()})")
                     prolog.assertz(f"grandmother({grandparent_name}, {sibling.lower()})")
             
-
+            prolog.assertz(f"sibling({sister.lower()}, {sibling.lower()})")
+            prolog.assertz(f"sibling({sibling.lower()}, {sister.lower()})")
             prolog.assertz(f"female({sister.lower()})")
             return f"Learned that {sister} is a sister of {sibling}."
 
@@ -756,33 +794,25 @@ def process_statement(pattern_type, args):
         elif pattern_type == "parents":
             parent1, parent2, child = args
 
-            if not check_if_mother_exists(child, parent1):
-                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
-                prolog.assertz(f"female({parent1.lower()})")
+            if not check_if_mother_exists(child, parent1): #if the parent1 is the mother of child then parent2 becomes father
                 prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
                 prolog.assertz(f"male({parent2.lower()})")
-                return f"{child} already has a mother. Learned {parent2.lower()} is the father of {child.lower()}"
+                return f"{child} already has a mother named, {parent1}. Learned {parent2.lower()} is the father of {child.lower()}"
             
             if not check_if_mother_exists(child, parent2):
-                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
-                prolog.assertz(f"female({parent2.lower()})")
                 prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
                 prolog.assertz(f"male({parent1.lower()})")
-                return f"{child} already has a mother. Learned {parent1.lower()} is the father of {child.lower()}"
+                return f"{child} already has a mother named, {parent2}. Learned {parent1.lower()} is the father of {child.lower()}"
 
             if not check_if_father_exists(child, parent1):
-                prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
-                prolog.assertz(f"male({parent1.lower()})")
                 prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
                 prolog.assertz(f"female({parent2.lower()})")
-                return f"{child} already has a father. Learned {parent2.lower()} is the mother of {child.lower()}"
+                return f"{child} already has a father named, {parent1}. Learned {parent2.lower()} is the mother of {child.lower()}"
             
             if not check_if_father_exists(child, parent2):
-                prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
-                prolog.assertz(f"male({parent2.lower()})")
                 prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
                 prolog.assertz(f"female({parent1.lower()})")
-                return f"{child} already has a father. Learned {parent1.lower()} is the mother of {child.lower()}"
+                return f"{child} already has a father named, {parent2}. Learned {parent1.lower()} is the mother of {child.lower()}"
             
             if check_if_mother_exists(child, parent1):
                 return f"{parent1} cannot be an mother to {child} due to an existing relationship."
@@ -869,7 +899,6 @@ def process_statement(pattern_type, args):
             
             for child in [child1, child2, child3]:
                 current_parents = get_existing_parents(child) 
-                print(current_parents)
                 if parent.lower() in current_parents:
                     continue 
                 if len(current_parents) >= 2:
