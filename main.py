@@ -107,20 +107,19 @@ def check_if_mother_exists(child, mother):
     existing_mothers = list(prolog.query(f"mother(X, {child.lower()})"))
     for existing_mother in existing_mothers:
         if existing_mother["X"].lower() == mother.lower():
-            print(existing_mother["X"].lower())
-            return False  
+            return "mother" 
         if existing_mother["X"].lower() != mother.lower():
-            print(existing_mother["X"].lower())
             return True
-
+    return False
 
 def check_if_father_exists(child, father):
     existing_fathers = list(prolog.query(f"father(X, {child.lower()})"))
     for existing_father in existing_fathers:
         if existing_father["X"].lower() == father.lower():
-            return False  
+            return "father"
         if existing_father["X"].lower() != father.lower():
             return True
+    return False
 
 def assert_if_not_exists(fact):
     existing_fact = list(prolog.query(fact))
@@ -358,7 +357,7 @@ def process_statement(pattern_type, args):
             siblings = list(prolog.query(f"sibling(X, {child.lower()})"))
             for sibling in siblings:
                 sibling_name = sibling["X"]
-                if not check_if_father_exists(sibling_name, father):
+                if check_if_father_exists(sibling_name, father) == "father":
                     prolog.assertz(f"parent({father.lower()}, {sibling_name})")
 
             prolog.assertz(f"parent({father.lower()}, {child.lower()})")
@@ -397,7 +396,7 @@ def process_statement(pattern_type, args):
             siblings = list(prolog.query(f"sibling(X, {child.lower()})"))
             for sibling in siblings:
                 sibling_name = sibling["X"]
-                if not check_if_mother_exists(sibling_name, mother):
+                if  check_if_mother_exists(sibling_name, mother) == "mother" :
                     prolog.assertz(f"parent({mother.lower()}, {sibling_name})")
 
             prolog.assertz(f"parent({mother.lower()}, {child.lower()})")
@@ -794,22 +793,22 @@ def process_statement(pattern_type, args):
         elif pattern_type == "parents":
             parent1, parent2, child = args
 
-            if not check_if_mother_exists(child, parent1): #if the parent1 is the mother of child then parent2 becomes father
+            if check_if_mother_exists(child, parent1) == "mother": 
                 prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
                 prolog.assertz(f"male({parent2.lower()})")
                 return f"{child} already has a mother named, {parent1}. Learned {parent2.lower()} is the father of {child.lower()}"
             
-            if not check_if_mother_exists(child, parent2):
+            if check_if_mother_exists(child, parent2) == "mother":
                 prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
                 prolog.assertz(f"male({parent1.lower()})")
                 return f"{child} already has a mother named, {parent2}. Learned {parent1.lower()} is the father of {child.lower()}"
 
-            if not check_if_father_exists(child, parent1):
+            if check_if_father_exists(child, parent1) == "father":
                 prolog.assertz(f"parent({parent2.lower()}, {child.lower()})")
                 prolog.assertz(f"female({parent2.lower()})")
                 return f"{child} already has a father named, {parent1}. Learned {parent2.lower()} is the mother of {child.lower()}"
             
-            if not check_if_father_exists(child, parent2):
+            if check_if_father_exists(child, parent2) == "father":
                 prolog.assertz(f"parent({parent1.lower()}, {child.lower()})")
                 prolog.assertz(f"female({parent1.lower()})")
                 return f"{child} already has a father named, {parent2}. Learned {parent1.lower()} is the mother of {child.lower()}"
