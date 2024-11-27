@@ -2,3 +2,123 @@
  Family Relationships Chatbot
 
 The chatbot developed for this project is designed to understand and process family relationships using a logic-based inference system. It accepts user prompts in the form of statements or questions, encodes them into a knowledge base using PROLOG, and provides intelligent responses. This chatbot is tailored to exhibit basic reasoning about family structures while ensuring ease of use and interaction.
+
+### Instructions for Running the Program
+
+This program is designed to manage family relationships using logical rules. You can query and assert relationships such as parent, sibling, grandparent, aunt/uncle, and more, as well as check for circular or conflicting relationships.
+
+---
+
+#### **Requirements**
+
+1. **Python Environment**
+   - Ensure you have Python 3.6+ installed.
+   - Install the `pyswip` library to interact with Prolog.
+
+   ```bash
+   pip install pyswip
+   ```
+
+2. **Prolog Interpreter**
+   - Ensure you have SWI-Prolog installed. Download it from [SWI-Prolog Official Website](https://www.swi-prolog.org/).
+
+3. **File Structure**
+   - Save the following files in the same directory:
+     - `main.py`: Contains the Python code for running the program.
+     - `family.pl`: Prolog file defining the family relationship rules.
+     - `instructions.txt`: This file with instructions.
+
+---
+
+#### **Running the Program**
+
+1. Open a terminal or command prompt.
+
+2. Navigate to the directory containing the program files.
+
+3. Run the program using the following command:
+   ```bash
+   python main.py
+   ```
+
+4. Once the program starts, you will be prompted to enter a statement or a question. Input your query or assertion as a sentence. The program will respond with the results or feedback.
+
+---
+
+#### **How to Interact**
+
+1. **Assertions**
+   - To add relationships, use the following patterns:
+     - **Parents**: `<Parent1> and <Parent2> are parents of <Child>.`
+       - Example: `John and Mary are parents of Alice.`
+     - **Mother**: `<Mother> is the mother of <Child>.`
+       - Example: `Mary is the mother of Alice.`
+     - **Father**: `<Father> is the father of <Child>.`
+       - Example: `John is the father of Alice.`
+     - **Siblings**: `<Sibling1> and <Sibling2> are siblings.`
+       - Example: `Alice and Bob are siblings.`
+     - **Aunt/Uncle**: `<Aunt/Uncle> is an aunt/uncle of <Child>.`
+       - Example: `Sarah is an aunt of Bob.`
+     - **Grandparents**: `<Grandparent> is a grandparent of <Child>.`
+       - Example: `John is a grandfather of Bob.`
+
+2. **Queries**
+   - Ask about relationships using the following patterns:
+     - **Parent**: `Who is the parent of <Child>?`
+     - **Grandparent**: `Who is the grandparent of <Child>?`
+     - **Siblings**: `Who are the siblings of <Person>?`
+     - **Aunts/Uncles**: `Who are the aunts/uncles of <Person>?`
+     - **Children**: `Who are the children of <Parent>?`
+
+3. **Invalid Assertions**
+   - The program will check for circular relationships and conflicting roles. If a relationship cannot be established, an error message will explain why.
+
+---
+
+#### **Important Notes**
+
+- **Circular Relationship Handling**: The program prevents relationships that create loops, such as a child being their own ancestor.
+- **Gender Specificity**: Gender must align with the type of relationship. For example, only females can be mothers or aunts.
+- **Existing Relationships**: The program avoids overwriting or conflicting with existing relationships.
+- **Case Sensitivity**: All names are case-insensitive but stored in lowercase.
+
+---
+
+#### **Example Workflow**
+
+1. Input:
+   ```
+   Mary and John are parents of Alice.
+   ```
+   Output:
+   ```
+   Learned that Mary and John are the parents of Alice.
+   ```
+
+2. Input:
+   ```
+   Mary is the mother of Alice.
+   ```
+   Output:
+   ```
+   Learned that Mary is the mother of Alice.
+   ```
+
+3. Input:
+   ```
+   John is the grandfather of Bob.
+   ```
+   Output:
+   ```
+   Learned that John is the grandfather of Bob.
+   ```
+
+4. Input:
+   ```
+   Who are the parents of Alice?
+   ```
+   Output:
+   ```
+   The parents of Alice are Mary and John.
+   ```
+

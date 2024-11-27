@@ -63,3 +63,11 @@ Is Georgia an aunt of Miguel?
 Is George an uncle of Riley?
 
 Are Georgia and George relatives?
+
+
+Julia is a sister of Jo.
+Jc is a brother of Jo.
+Jc and Jill are siblings.
+Tony is the father of Jo.
+Who are the children of Tony?
+Who are the parents of Jill?
